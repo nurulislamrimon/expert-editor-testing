@@ -1,0 +1,50 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+
+  documents Document[]
+
+  @@map("users")
+}
+
+model Document {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   Json
+  authorId  String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model Media {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  url       String
+  size      Int
+  mimeType  String
+  uploadedBy String  @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@map("media")
+}
