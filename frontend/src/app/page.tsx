@@ -73,14 +73,12 @@ export default function Home() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.clientInstance.post('/auth/login', {
+      const response = await api.clientInstance.post('/auth/login', {
         email: loginEmail,
         password: loginPassword,
       });
-      const token = api.getToken();
-      if (token) {
-        setIsAuthenticated(true);
-      }
+      api.setToken(response.data.token);
+      setIsAuthenticated(true);
     } catch (error) {
       console.error('Login failed:', error);
       alert('Login failed');
@@ -90,17 +88,16 @@ export default function Home() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.clientInstance.post('/auth/register', {
+      const response = await api.clientInstance.post('/auth/register', {
         email: registerEmail,
         password: registerPassword,
       });
-      const token = api.getToken();
-      if (token) {
-        setIsAuthenticated(true);
-      }
-    } catch (error) {
+      api.setToken(response.data.token);
+      setIsAuthenticated(true);
+    } catch (error: unknown) {
       console.error('Registration failed:', error);
-      alert('Registration failed');
+      const err = error as { response?: { data?: { message?: string } } };
+      alert(err.response?.data?.message || 'Registration failed');
     }
   };
 
@@ -130,26 +127,26 @@ export default function Home() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md w-96">
+        <div className="bg-white p-8 rounded-lg shadow-md w-96 text-gray-900">
           <h1 className="text-2xl font-bold mb-6 text-center">
             {isRegistering ? 'Register' : 'Login'}
           </h1>
           <form onSubmit={isRegistering ? handleRegister : handleLogin}>
-            {isRegistering ? (
+            {              isRegistering ? (
               <>
                 <input
                   type="email"
                   placeholder="Email"
                   value={registerEmail}
                   onChange={(e) => setRegisterEmail(e.target.value)}
-                  className="w-full p-2 border rounded mb-4"
+                  className="w-full p-2 border rounded mb-4 bg-white text-black"
                 />
                 <input
                   type="password"
                   placeholder="Password"
                   value={registerPassword}
                   onChange={(e) => setRegisterPassword(e.target.value)}
-                  className="w-full p-2 border rounded mb-4"
+                  className="w-full p-2 border rounded mb-4 bg-white text-black"
                 />
               </>
             ) : (
@@ -159,14 +156,14 @@ export default function Home() {
                   placeholder="Email"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
-                  className="w-full p-2 border rounded mb-4"
+                  className="w-full p-2 border rounded mb-4 bg-white text-black"
                 />
                 <input
                   type="password"
                   placeholder="Password"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full p-2 border rounded mb-4"
+                  className="w-full p-2 border rounded mb-4 bg-white text-black"
                 />
               </>
             )}
